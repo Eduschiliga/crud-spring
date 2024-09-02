@@ -1,9 +1,12 @@
 package com.eduardo.dto.mapper;
 
 import com.eduardo.dto.CourseDTO;
+import com.eduardo.dto.LessonDTO;
 import com.eduardo.enums.Category;
 import com.eduardo.model.Course;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class CourseMapper {
@@ -11,7 +14,18 @@ public class CourseMapper {
     if (course == null) {
       return null;
     }
-    return new CourseDTO(course.getId(), course.getName(), course.getCategory().getValue());
+
+    List<LessonDTO> lessonDTOs = course.getLessons()
+        .stream()
+        .map(lesson -> new LessonDTO(lesson.getId(), lesson.getName(), lesson.getYoutubeUrl()))
+        .toList();
+
+    return new CourseDTO(
+        course.getId(),
+        course.getName(),
+        course.getCategory().getValue(),
+        lessonDTOs
+    );
   }
 
   public Course toEntity(CourseDTO courseDTO) {
