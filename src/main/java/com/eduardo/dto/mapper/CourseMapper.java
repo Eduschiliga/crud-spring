@@ -1,6 +1,7 @@
 package com.eduardo.dto.mapper;
 
 import com.eduardo.dto.CourseDTO;
+import com.eduardo.enums.Category;
 import com.eduardo.model.Course;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ public class CourseMapper {
     if (course == null) {
       return null;
     }
-    return new CourseDTO(course.getId(), course.getName(), course.getCategory());
+    return new CourseDTO(course.getId(), course.getName(), course.getCategory().getValue());
   }
 
   public Course toEntity(CourseDTO courseDTO) {
@@ -25,8 +26,20 @@ public class CourseMapper {
     }
 
     course.setName(courseDTO.name());
-    course.setCategory(courseDTO.category());
+    course.setCategory(convertCategory(courseDTO.category()));
 
     return course;
+  }
+
+  public Category convertCategory(String value) {
+    if (value == null) {
+      return null;
+    }
+
+    return switch (value) {
+      case "Front-End" -> Category.FRONT_END;
+      case "Back-End" -> Category.BACK_END;
+      default -> throw new IllegalArgumentException("Invalid category: " + value);
+    };
   }
 }

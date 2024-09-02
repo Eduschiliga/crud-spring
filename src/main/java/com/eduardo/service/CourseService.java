@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class CourseService {
     return courseRepository.findAll().stream().map(courseMapper::toDTO).collect(Collectors.toList());
   }
 
-  public CourseDTO findById(@PathVariable @NotNull @Positive Long id) {
+  public CourseDTO findById(@NotNull @Positive Long id) {
     return courseRepository.findById(id).map(courseMapper::toDTO).orElseThrow(() -> new RecordNotFoundException(id));
   }
 
@@ -40,12 +39,12 @@ public class CourseService {
   public CourseDTO update(@Valid @NotNull @Positive Long id, @Valid CourseDTO course) {
     return courseRepository.findById(id).map(recordFound -> {
       recordFound.setName(course.name());
-      recordFound.setCategory(course.category());
+      recordFound.setCategory(courseMapper.convertCategory(course.category()));
       return courseMapper.toDTO(courseRepository.save(recordFound));
     }).orElseThrow(() -> new RecordNotFoundException(id));
   }
 
-  public void delete(@PathVariable @NotNull @Valid @Positive Long id) {
+  public void delete(@NotNull @Valid @Positive Long id) {
     courseRepository.delete(courseRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(id)));
   }
 }

@@ -1,6 +1,5 @@
 package com.eduardo;
 
-import com.eduardo.model.Course;
 import com.eduardo.repository.CourseRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,13 +16,7 @@ public class CrudSpringApplication {
   @Bean
   CommandLineRunner initDatabase(CourseRepository courseRepository) {
     return args -> {
-      courseRepository.deleteAll();
 
-      Course c = new Course();
-      c.setName("Angular com Spring");
-      c.setCategory("Front-End");
-
-      courseRepository.save(c);
     };
   }
 }
