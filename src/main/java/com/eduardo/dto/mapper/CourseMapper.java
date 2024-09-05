@@ -4,6 +4,7 @@ import com.eduardo.dto.CourseDTO;
 import com.eduardo.dto.LessonDTO;
 import com.eduardo.enums.Category;
 import com.eduardo.model.Course;
+import com.eduardo.model.Lesson;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -41,6 +42,17 @@ public class CourseMapper {
 
     course.setName(courseDTO.name());
     course.setCategory(convertCategory(courseDTO.category()));
+
+    List<Lesson> lessons = courseDTO.lessons().stream().map(lessonDTO -> {
+      var lesson = new Lesson();
+      lesson.setId(lessonDTO.id());
+      lesson.setName(lessonDTO.name());
+      lesson.setYoutubeUrl(lessonDTO.youtubeUrl());
+      lesson.setCourse(course);
+      return lesson;
+    }).toList();
+
+    course.setLessons(lessons);
 
     return course;
   }

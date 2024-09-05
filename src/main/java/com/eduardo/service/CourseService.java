@@ -1,17 +1,22 @@
 package com.eduardo.service;
 
 import com.eduardo.dto.CourseDTO;
+import com.eduardo.dto.CoursePageDTO;
 import com.eduardo.dto.mapper.CourseMapper;
 import com.eduardo.exceptions.RecordNotFoundException;
+import com.eduardo.model.Course;
 import com.eduardo.repository.CourseRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Validated
 @Service
@@ -24,8 +29,10 @@ public class CourseService {
     this.courseMapper = courseMapper;
   }
 
-  public List<CourseDTO> list() {
-    return courseRepository.findAll().stream().map(courseMapper::toDTO).collect(Collectors.toList());
+  public CoursePageDTO list(@PositiveOrZero int pageNumber, @Positive @Max(100) int size) {
+    Page<Course> page = courseRepository.findAll(PageRequest.of(pageNumber, size));
+    List<CourseDTO> courseDTOS = page.get().map(courseMapper::toDTO).toList();
+    return new CoursePageDTO(courseDTOS, page.getTotalElements(), page.getTotalPages());
   }
 
   public CourseDTO findById(@NotNull @Positive Long id) {
@@ -36,10 +43,13 @@ public class CourseService {
     return courseMapper.toDTO(courseRepository.save(courseMapper.toEntity(course)));
   }
 
-  public CourseDTO update(@Valid @NotNull @Positive Long id, @Valid CourseDTO course) {
+  public CourseDTO update(@Valid @NotNull @Positive Long id, @Valid CourseDTO courseDTO) {
     return courseRepository.findById(id).map(recordFound -> {
-      recordFound.setName(course.name());
-      recordFound.setCategory(courseMapper.convertCategory(course.category()));
+      Course course = courseMapper.toEntity(courseDTO);
+      recordFound.setName(courseDTO.name());
+      recordFound.setCategory(courseMapper.convertCategory(courseDTO.category()));
+      recordFound.getLessons().clear();
+      course.getLessons().forEach(lessonFound -> recordFound.getLessons().add(lessonFound));
       return courseMapper.toDTO(courseRepository.save(recordFound));
     }).orElseThrow(() -> new RecordNotFoundException(id));
   }

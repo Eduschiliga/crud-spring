@@ -1,15 +1,16 @@
 package com.eduardo.controller;
 
 import com.eduardo.dto.CourseDTO;
+import com.eduardo.dto.CoursePageDTO;
 import com.eduardo.service.CourseService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -23,8 +24,8 @@ public class CourseController {
   }
 
   @GetMapping
-  public List<CourseDTO> list() {
-    return courseService.list();
+  public CoursePageDTO list(@RequestParam(defaultValue = "0") @PositiveOrZero int page, @RequestParam(defaultValue = "10") @Positive @Max(100) int pageSize) {
+    return courseService.list(page, pageSize);
   }
 
   @GetMapping("/{id}")
